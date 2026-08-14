@@ -1,13 +1,20 @@
 import os
+import random
+import string
+import asyncio
+import time
+
+import aiohttp
 import discord
-from discord.ext import commands
+from discord.ext import commands, tasks
 from discord import app_commands
+
 
 TOKEN = os.getenv("DISCORD_TOKEN")
 
-# =========================
-# CONFIGURAÇÕES
-# =========================
+# =========================================================
+# CONFIGURAÇÕES GERAIS
+# =========================================================
 
 GUILD_ID = 1513004124344680448
 
@@ -20,7 +27,13 @@ VERIFY_EMOJI = "🙏"
 SUPPORT_CHANNEL_ID = 1537248179643359366
 STAFF_ROLE_ID = 1522511412549783612
 
-# Imagem da embed
+# Checker 4C
+CHECKER_CHANNEL_ID = 1537261678071382056
+POMELO_URL = "https://api.pomelo.lixqa.cc/v1/lookups"
+
+# 6 segundos = abaixo do limite gratuito do Pomelo
+CHECK_INTERVAL = 6
+
 SUPPORT_IMAGE_URL = (
     "https://cdn.discordapp.com/attachments/"
     "1537248179643359366/1537253420543639552/banner.jpg"
@@ -28,18 +41,159 @@ SUPPORT_IMAGE_URL = (
     "19f7828ddfa5908b95a06cccef462dedb4696c2fe6c502cb8a72dad511b7009f&"
 )
 
+
+# =========================================================
+# BOT
+# =========================================================
+
 intents = discord.Intents.default()
 intents.members = True
 intents.reactions = True
 
-bot = commands.Bot(command_prefix="!", intents=intents)
+bot = commands.Bot(
+    command_prefix="!",
+    intents=intents
+)
+
+checked_names = set()
+posted_names = set()
 
 
-# =========================
+# =========================================================
+# GERADOR 4C
+# =========================================================
+
+def generate_4c():
+    chars = string.ascii_lowercase + string.digits
+    return "".join(random.choice(chars) for _ in range(4))
+
+
+# =========================================================
+# CONSULTA POMELO
+# =========================================================
+
+async def check_username(username):
+    try:
+        async with aiohttp.ClientSession() as session:
+
+            async with session.post(
+                POMELO_URL,
+                json={
+                    "username": username
+                },
+                timeout=aiohttp.ClientTimeout(total=15)
+            ) as response:
+
+                if response.status == 429:
+                    print("⚠️ Rate limit do Pomelo.")
+                    return None
+
+                if response.status != 200:
+                    print(
+                        f"⚠️ Pomelo retornou HTTP "
+                        f"{response.status} para {username}"
+                    )
+                    return None
+
+                data = await response.json()
+
+                print(
+                    f"🔎 Resultado {username}: {data}"
+                )
+
+                # Aceita formatos comuns da API
+                if isinstance(data, dict):
+
+                    if data.get("available") is True:
+                        return True
+
+                    if data.get("is_available") is True:
+                        return True
+
+                    if data.get("availability") is True:
+                        return True
+
+                    result = data.get("result")
+
+                    if isinstance(result, dict):
+                        if result.get("available") is True:
+                            return True
+
+                    data_field = data.get("data")
+
+                    if isinstance(data_field, dict):
+                        if data_field.get("available") is True:
+                            return True
+
+                return False
+
+    except asyncio.TimeoutError:
+        print("⚠️ Pomelo demorou demais para responder.")
+        return None
+
+    except Exception as error:
+        print(f"❌ Erro no checker: {error}")
+        return None
+
+
+# =========================================================
+# LOOP AUTOMÁTICO 4C
+# =========================================================
+
+@tasks.loop(seconds=CHECK_INTERVAL)
+async def four_character_checker():
+
+    channel = bot.get_channel(CHECKER_CHANNEL_ID)
+
+    if channel is None:
+        print("❌ Canal do checker não encontrado.")
+        return
+
+    username = generate_4c()
+
+    if username in checked_names:
+        return
+
+    checked_names.add(username)
+
+    # Limita memória
+    if len(checked_names) > 10000:
+        checked_names.clear()
+
+    available = await check_username(username)
+
+    if available is not True:
+        return
+
+    if username in posted_names:
+        return
+
+    posted_names.add(username)
+
+    timestamp = int(time.time())
+
+    message = (
+        f"✅ - **{username}** | Está **disponível** para uso "
+        f"a partir do momento desta mensagem. "
+        f"<t:{timestamp}:F> (<t:{timestamp}:R>)"
+    )
+
+    await channel.send(message)
+
+    print(f"✅ 4C DISPONÍVEL: {username}")
+
+
+@four_character_checker.before_loop
+async def before_checker():
+    await bot.wait_until_ready()
+
+
+# =========================================================
 # FECHAR TICKET
-# =========================
+# =========================================================
 
 class CloseTicketView(discord.ui.View):
+
     def __init__(self):
         super().__init__(timeout=None)
 
@@ -54,20 +208,28 @@ class CloseTicketView(discord.ui.View):
         interaction: discord.Interaction,
         button: discord.ui.Button
     ):
-        staff_role = interaction.guild.get_role(STAFF_ROLE_ID)
+
+        staff_role = interaction.guild.get_role(
+            STAFF_ROLE_ID
+        )
 
         is_staff = (
             staff_role in interaction.user.roles
             or interaction.user.guild_permissions.administrator
         )
 
-        is_owner = interaction.channel.topic == str(interaction.user.id)
+        is_owner = (
+            interaction.channel.topic
+            == str(interaction.user.id)
+        )
 
         if not is_staff and not is_owner:
+
             await interaction.response.send_message(
                 "❌ Você não pode fechar este ticket.",
                 ephemeral=True
             )
+
             return
 
         await interaction.response.send_message(
@@ -80,31 +242,37 @@ class CloseTicketView(discord.ui.View):
         )
 
 
-# =========================
-# MENU DO SUPORTE
-# =========================
+# =========================================================
+# MENU SUPORTE
+# =========================================================
 
 class SupportSelect(discord.ui.Select):
+
     def __init__(self):
+
         options = [
+
             discord.SelectOption(
                 label="Suporte",
                 description="Precisa de ajuda com algo no servidor.",
                 emoji="🎫",
                 value="suporte"
             ),
+
             discord.SelectOption(
                 label="Dúvida",
                 description="Tire uma dúvida com nossa equipe.",
                 emoji="❓",
                 value="duvida"
             ),
+
             discord.SelectOption(
                 label="Denúncia",
                 description="Envie uma denúncia de forma privada.",
                 emoji="🚨",
                 value="denuncia"
             )
+
         ]
 
         super().__init__(
@@ -115,28 +283,50 @@ class SupportSelect(discord.ui.Select):
             custom_id="support_select_23"
         )
 
-    async def callback(self, interaction: discord.Interaction):
+    async def callback(
+        self,
+        interaction: discord.Interaction
+    ):
+
         guild = interaction.guild
-        staff_role = guild.get_role(STAFF_ROLE_ID)
+
+        staff_role = guild.get_role(
+            STAFF_ROLE_ID
+        )
 
         if staff_role is None:
+
             await interaction.response.send_message(
                 "❌ Cargo da Staff não encontrado.",
                 ephemeral=True
             )
+
             return
 
-        # Impede múltiplos tickets
+        # Evita mais de um ticket
         for channel in guild.text_channels:
-            if channel.topic == str(interaction.user.id):
+
+            if channel.topic == str(
+                interaction.user.id
+            ):
+
                 await interaction.response.send_message(
-                    f"❌ Você já possui um atendimento aberto: {channel.mention}",
+                    f"❌ Você já possui um atendimento aberto: "
+                    f"{channel.mention}",
                     ephemeral=True
                 )
+
                 return
 
-        support_channel = guild.get_channel(SUPPORT_CHANNEL_ID)
-        category = support_channel.category if support_channel else None
+        support_channel = guild.get_channel(
+            SUPPORT_CHANNEL_ID
+        )
+
+        category = (
+            support_channel.category
+            if support_channel
+            else None
+        )
 
         ticket_type = self.values[0]
 
@@ -158,43 +348,51 @@ class SupportSelect(discord.ui.Select):
             "denuncia": "Denúncia"
         }
 
-        safe_name = interaction.user.name.lower().replace(" ", "-")
+        safe_name = (
+            interaction.user.name
+            .lower()
+            .replace(" ", "-")
+        )
 
         overwrites = {
-            guild.default_role: discord.PermissionOverwrite(
-                view_channel=False
-            ),
 
-            interaction.user: discord.PermissionOverwrite(
-                view_channel=True,
-                send_messages=True,
-                read_message_history=True,
-                attach_files=True,
-                embed_links=True
-            ),
+            guild.default_role:
+                discord.PermissionOverwrite(
+                    view_channel=False
+                ),
 
-            staff_role: discord.PermissionOverwrite(
-                view_channel=True,
-                send_messages=True,
-                read_message_history=True,
-                attach_files=True,
-                embed_links=True
-            ),
+            interaction.user:
+                discord.PermissionOverwrite(
+                    view_channel=True,
+                    send_messages=True,
+                    read_message_history=True,
+                    attach_files=True,
+                    embed_links=True
+                ),
 
-            guild.me: discord.PermissionOverwrite(
-                view_channel=True,
-                send_messages=True,
-                read_message_history=True,
-                manage_channels=True
-            )
+            staff_role:
+                discord.PermissionOverwrite(
+                    view_channel=True,
+                    send_messages=True,
+                    read_message_history=True,
+                    attach_files=True,
+                    embed_links=True
+                ),
+
+            guild.me:
+                discord.PermissionOverwrite(
+                    view_channel=True,
+                    send_messages=True,
+                    read_message_history=True,
+                    manage_channels=True
+                )
         }
 
         ticket = await guild.create_text_channel(
             name=f"{names[ticket_type]}-{safe_name}",
             category=category,
             overwrites=overwrites,
-            topic=str(interaction.user.id),
-            reason=f"{titles[ticket_type]} aberto por {interaction.user}"
+            topic=str(interaction.user.id)
         )
 
         await interaction.response.send_message(
@@ -202,57 +400,48 @@ class SupportSelect(discord.ui.Select):
             ephemeral=True
         )
 
-        ticket_embed = discord.Embed(
-            title=f"{emojis[ticket_type]} {titles[ticket_type]} | 23",
+        embed = discord.Embed(
+            title=(
+                f"{emojis[ticket_type]} "
+                f"{titles[ticket_type]} | 23"
+            ),
             description=(
                 f"Olá {interaction.user.mention}.\n\n"
                 "Explique abaixo o motivo do seu atendimento.\n"
-                f"A equipe {staff_role.mention} responderá assim que possível."
+                f"A equipe {staff_role.mention} responderá "
+                "assim que possível."
             ),
             color=0x5865F2
         )
 
-        ticket_embed.set_footer(
+        embed.set_footer(
             text="23 • Central de Atendimento"
         )
 
         await ticket.send(
-            content=f"{interaction.user.mention} {staff_role.mention}",
-            embed=ticket_embed,
+            content=(
+                f"{interaction.user.mention} "
+                f"{staff_role.mention}"
+            ),
+            embed=embed,
             view=CloseTicketView()
         )
 
 
 class SupportView(discord.ui.View):
+
     def __init__(self):
         super().__init__(timeout=None)
         self.add_item(SupportSelect())
 
 
-# =========================
-# BOT ONLINE
-# =========================
-
-@bot.event
-async def on_ready():
-    bot.add_view(SupportView())
-    bot.add_view(CloseTicketView())
-
-    try:
-        guild = discord.Object(id=GUILD_ID)
-        await bot.tree.sync(guild=guild)
-    except Exception as erro:
-        print(f"❌ Erro ao sincronizar comandos: {erro}")
-
-    print(f"✅ /23 online como {bot.user}")
-
-
-# =========================
+# =========================================================
 # VERIFICAÇÃO
-# =========================
+# =========================================================
 
 @bot.event
 async def on_raw_reaction_add(payload):
+
     if payload.user_id == bot.user.id:
         return
 
@@ -270,63 +459,81 @@ async def on_raw_reaction_add(payload):
     if guild is None:
         return
 
-    role = guild.get_role(MEMBER_ROLE_ID)
+    role = guild.get_role(
+        MEMBER_ROLE_ID
+    )
 
     if role is None:
-        print("❌ Cargo Member não encontrado.")
         return
 
     member = payload.member
 
     if member is None:
+
         try:
-            member = await guild.fetch_member(payload.user_id)
+
+            member = await guild.fetch_member(
+                payload.user_id
+            )
+
         except discord.HTTPException:
             return
 
     try:
+
         await member.add_roles(
             role,
             reason="Verificação por reação 🙏"
         )
 
-        print(f"✅ {member} foi verificado.")
+        print(
+            f"✅ {member} foi verificado."
+        )
 
-    except discord.Forbidden:
-        print("❌ Sem permissão para adicionar Member.")
+    except Exception as error:
 
-    except discord.HTTPException as erro:
-        print(f"❌ Erro: {erro}")
+        print(
+            f"❌ Erro verificação: {error}"
+        )
 
 
-# =========================
-# /setup_suporte
-# =========================
+# =========================================================
+# SETUP SUPORTE
+# =========================================================
 
 @bot.tree.command(
     name="setup_suporte",
     description="Cria a Central de Atendimento",
     guild=discord.Object(id=GUILD_ID)
 )
-@app_commands.checks.has_permissions(administrator=True)
-async def setup_suporte(interaction: discord.Interaction):
-    channel = interaction.guild.get_channel(SUPPORT_CHANNEL_ID)
+@app_commands.checks.has_permissions(
+    administrator=True
+)
+async def setup_suporte(
+    interaction: discord.Interaction
+):
+
+    channel = interaction.guild.get_channel(
+        SUPPORT_CHANNEL_ID
+    )
 
     if channel is None:
+
         await interaction.response.send_message(
-            "❌ Canal de suporte não encontrado.",
+            "❌ Canal não encontrado.",
             ephemeral=True
         )
+
         return
 
     embed = discord.Embed(
         title="Central de Atendimento | 23",
         description=(
-            "Após solicitar atendimento, por favor, aguarde que "
-            "um membro da nossa equipe lhe responda.\n\n"
+            "Após solicitar atendimento, por favor, aguarde "
+            "que um membro da nossa equipe lhe responda.\n\n"
 
-            "⚠️ O atendimento é realizado de forma privada, com "
-            "acesso exclusivo da equipe.\n\n"
+            "⚠️ O atendimento é realizado de forma privada, "
+            "com acesso exclusivo da equipe.\n\n"
 
             "**Horários de Atendimento:**\n"
             "⏰ Segunda a Sexta: **13:00 às 22:00**\n"
@@ -337,7 +544,9 @@ async def setup_suporte(interaction: discord.Interaction):
         color=0x5865F2
     )
 
-    embed.set_image(url=SUPPORT_IMAGE_URL)
+    embed.set_image(
+        url=SUPPORT_IMAGE_URL
+    )
 
     await channel.send(
         embed=embed,
@@ -345,8 +554,45 @@ async def setup_suporte(interaction: discord.Interaction):
     )
 
     await interaction.response.send_message(
-        f"✅ Central de Atendimento criada em {channel.mention}.",
+        "✅ Central criada.",
         ephemeral=True
+    )
+
+
+# =========================================================
+# READY
+# =========================================================
+
+@bot.event
+async def on_ready():
+
+    bot.add_view(
+        SupportView()
+    )
+
+    bot.add_view(
+        CloseTicketView()
+    )
+
+    try:
+
+        await bot.tree.sync(
+            guild=discord.Object(
+                id=GUILD_ID
+            )
+        )
+
+    except Exception as error:
+
+        print(
+            f"❌ Sync: {error}"
+        )
+
+    if not four_character_checker.is_running():
+        four_character_checker.start()
+
+    print(
+        f"✅ /23 online como {bot.user}"
     )
 
 
