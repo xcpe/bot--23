@@ -71,46 +71,40 @@ def generate_4c():
 # =========================================================
 # CONSULTA POMELO
 # =========================================================
-
-
+async def check_username(username):
     try:
         async with aiohttp.ClientSession() as session:
-
             async with session.post(
                 POMELO_URL,
-                json={
-                    "username": username
-                },
+                json={"username": username},
                 timeout=aiohttp.ClientTimeout(total=15)
             ) as response:
+
+                text = await response.text()
+
+                print(
+                    f"🔎 Pomelo {username} | "
+                    f"HTTP {response.status} | "
+                    f"Resposta: {text}"
+                )
 
                 if response.status == 429:
                     print("⚠️ Rate limit do Pomelo.")
                     return None
 
                 if response.status != 200:
-                    print(
-                        f"⚠️ Pomelo retornou HTTP "
-                        f"{response.status} para {username}"
-                    )
                     return None
 
-                data = await response.json()
+                try:
+                    data = await response.json()
+                except Exception:
+                    return None
 
-                print(
-                    f"🔎 Resultado {username}: {data}"
-                )
-
-                # Aceita formatos comuns da API
                 if isinstance(data, dict):
-
                     if data.get("available") is True:
                         return True
 
                     if data.get("is_available") is True:
-                        return True
-
-                    if data.get("availability") is True:
                         return True
 
                     result = data.get("result")
@@ -119,23 +113,11 @@ def generate_4c():
                         if result.get("available") is True:
                             return True
 
-                    data_field = data.get("data")
-
-                    if isinstance(data_field, dict):
-                        if data_field.get("available") is True:
-                            return True
-
                 return False
-
-    except asyncio.TimeoutError:
-        print("⚠️ Pomelo demorou demais para responder.")
-        return None
 
     except Exception as error:
         print(f"❌ Erro no checker: {error}")
         return None
-
-
 # =========================================================
 # LOOP AUTOMÁTICO 4C
 # =========================================================
