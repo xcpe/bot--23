@@ -72,7 +72,7 @@ def generate_4c():
 # CONSULTA POMELO
 # =========================================================
 
-async def check_username(username):
+
     try:
         async with aiohttp.ClientSession() as session:
 
