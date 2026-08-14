@@ -3,8 +3,6 @@ import random
 import string
 import asyncio
 import time
-
-import aiohttp
 import discord
 from discord.ext import commands, tasks
 from discord import app_commands
@@ -66,63 +64,11 @@ posted_names = set()
 def generate_4c():
     chars = string.ascii_lowercase + string.digits
     return "".join(random.choice(chars) for _ in range(4))
-
-
 # =========================================================
-# CONSULTA POMELO
-# =========================================================
-async def check_username(username):
-    try:
-        async with aiohttp.ClientSession() as session:
-            async with session.post(
-                POMELO_URL,
-                json={"username": username},
-                timeout=aiohttp.ClientTimeout(total=15)
-            ) as response:
-
-                text = await response.text()
-
-                print(
-                    f"🔎 Pomelo {username} | "
-                    f"HTTP {response.status} | "
-                    f"Resposta: {text}"
-                )
-
-                if response.status == 429:
-                    print("⚠️ Rate limit do Pomelo.")
-                    return None
-
-                if response.status != 200:
-                    return None
-
-                try:
-                    data = await response.json()
-                except Exception:
-                    return None
-
-                if isinstance(data, dict):
-                    if data.get("available") is True:
-                        return True
-
-                    if data.get("is_available") is True:
-                        return True
-
-                    result = data.get("result")
-
-                    if isinstance(result, dict):
-                        if result.get("available") is True:
-                            return True
-
-                return False
-
-    except Exception as error:
-        print(f"❌ Erro no checker: {error}")
-        return None
 # =========================================================
 # LOOP AUTOMÁTICO 4C
-# =========================================================
-
-@tasks.loop(seconds=CHECK_INTERVAL)
+# ========================================================
+@tasks.loop(seconds=60)
 async def four_character_checker():
 
     channel = bot.get_channel(CHECKER_CHANNEL_ID)
@@ -133,43 +79,30 @@ async def four_character_checker():
 
     username = generate_4c()
 
-    if username in checked_names:
-        return
-
-    checked_names.add(username)
-
-    # Limita memória
-    if len(checked_names) > 10000:
-        checked_names.clear()
-
-    available = await check_username(username)
-
-    if available is not True:
-        return
-
     if username in posted_names:
         return
 
     posted_names.add(username)
 
+    if len(posted_names) > 10000:
+        posted_names.clear()
+
     timestamp = int(time.time())
 
     message = (
-        f"✅ - **{username}** | Está **disponível** para uso "
-        f"a partir do momento desta mensagem. "
+        f"☁️ **²³ • 4C**\n"
+        f"🔎 - **{username}** | 4C gerado para tentativa de uso. "
         f"<t:{timestamp}:F> (<t:{timestamp}:R>)"
     )
 
     await channel.send(message)
 
-    print(f"✅ 4C DISPONÍVEL: {username}")
+    print(f"🔎 4C GERADO: {username}")
 
 
 @four_character_checker.before_loop
 async def before_checker():
     await bot.wait_until_ready()
-
-
 # =========================================================
 # FECHAR TICKET
 # =========================================================
