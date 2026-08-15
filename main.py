@@ -527,7 +527,7 @@ class Central23View(discord.ui.View):
         style=discord.ButtonStyle.secondary,
         custom_id="central23_squad"
     )
-        async def squad(
+    async def squad(
         self,
         interaction: discord.Interaction,
         button: discord.ui.Button
