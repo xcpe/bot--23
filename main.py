@@ -633,10 +633,10 @@ class Squad23View(discord.ui.View):
             ephemeral=True
         )
         class Squad23View(discord.ui.View):
-    def __init__(self):
+        def __init__(self):
         super().__init__(timeout=None)
 
-    @discord.ui.button(
+        @discord.ui.button(
         label="Vagas",
         emoji="<:emoji_37:1538191545407381615>",
         style=discord.ButtonStyle.primary,
