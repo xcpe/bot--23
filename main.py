@@ -887,16 +887,16 @@ async def send_squad_panel():
     print("✅ Painel Squad ²³ criado com sucesso.")
 
 async def send_central_panel():
-        channel = bot.get_channel(CENTRAL_CHANNEL_ID)
+    channel = bot.get_channel(CENTRAL_CHANNEL_ID)
 
-        if channel is None:
-            print("❌ Central ²³: canal não encontrado.")
-            return
+    if channel is None:
+        print("❌ Central ²³: canal não encontrado.")
+        return
 
-        guild = channel.guild
+    guild = channel.guild
 
-        try:
-            embed = create_central_embed(guild)
+    try:
+        embed = create_central_embed(guild)
 
         await channel.send(
             embed=embed,
