@@ -569,7 +569,132 @@ class Central23View(discord.ui.View):
             ephemeral=True
         )
 
+class Squad23View(discord.ui.View):
+    def __init__(self):
+        super().__init__(timeout=None)
 
+    @discord.ui.button(
+        label="Vagas",
+        emoji="<:emoji_37:1538191545407381615>",
+        style=discord.ButtonStyle.primary,
+        custom_id="squad23_vagas"
+    )
+    async def vagas(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.send_message(
+            f"{EMOJI_VAGAS} Veja as vagas disponíveis para encontrar jogadores.",
+            ephemeral=True
+        )
+
+    @discord.ui.button(
+        label="Procurar",
+        emoji="<:emoji_38:1538191582249877514>",
+        style=discord.ButtonStyle.secondary,
+        custom_id="squad23_procurar"
+    )
+    async def procurar(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.send_message(
+            f"{EMOJI_PROCURAR} Procure jogadores para completar seu squad.",
+            ephemeral=True
+        )
+
+    @discord.ui.button(
+        label="Criar",
+        emoji="<:emoji_39:1538191603624190144>",
+        style=discord.ButtonStyle.success,
+        custom_id="squad23_criar"
+    )
+    async def criar(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.send_message(
+            f"{EMOJI_CRIAR} Crie uma nova vaga para seu squad.",
+            ephemeral=True
+        )
+
+    @discord.ui.button(
+        label="Meu Squad",
+        emoji="<:emoji_40:1538191651837837343>",
+        style=discord.ButtonStyle.secondary,
+        custom_id="squad23_meu_squad"
+    )
+    async def meu_squad(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.send_message(
+            f"{EMOJI_SQUAD} Aqui você poderá gerenciar seu squad.",
+            ephemeral=True
+        )
+
+    @discord.ui.button(
+        label="Entrar",
+        emoji="<:emoji_41:1538191684238577734>",
+        style=discord.ButtonStyle.primary,
+        custom_id="squad23_entrar"
+    )
+    async def entrar(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.send_message(
+            f"{EMOJI_ENTRAR} Escolha uma vaga disponível para entrar.",
+            ephemeral=True
+        )
+        class Squad23View(discord.ui.View):
+    def __init__(self):
+        super().__init__(timeout=None)
+
+    @discord.ui.button(
+        label="Vagas",
+        emoji="<:emoji_37:1538191545407381615>",
+        style=discord.ButtonStyle.primary,
+        custom_id="squad23_vagas"
+    )
+    async def vagas(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.send_message(
+            f"{EMOJI_VAGAS} Veja as vagas disponíveis para encontrar jogadores.",
+            ephemeral=True
+        )
+
+    @discord.ui.button(
+        label="Procurar",
+        emoji="<:emoji_38:1538191582249877514>",
+        style=discord.ButtonStyle.secondary,
+        custom_id="squad23_procurar"
+    )
+    async def procurar(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.send_message(
+            f"{EMOJI_PROCURAR} Procure jogadores para completar seu squad.",
+            ephemeral=True
+        )
+
+    @discord.ui.button(
+        label="Criar",
+        emoji="<:emoji_39:1538191603624190144>",
+        style=discord.ButtonStyle.success,
+        custom_id="squad23_criar"
+    )
+    async def criar(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.send_message(
+            f"{EMOJI_CRIAR} Crie uma nova vaga para seu squad.",
+            ephemeral=True
+        )
+
+    @discord.ui.button(
+        label="Meu Squad",
+        emoji="<:emoji_40:1538191651837837343>",
+        style=discord.ButtonStyle.secondary,
+        custom_id="squad23_meu_squad"
+    )
+    async def meu_squad(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.send_message(
+            f"{EMOJI_SQUAD} Aqui você poderá gerenciar seu squad.",
+            ephemeral=True
+        )
+
+    @discord.ui.button(
+        label="Entrar",
+        emoji="<:emoji_41:1538191684238577734>",
+        style=discord.ButtonStyle.primary,
+        custom_id="squad23_entrar"
+    )
+    async def entrar(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.send_message(
+            f"{EMOJI_ENTRAR} Escolha uma vaga disponível para entrar.",
+            ephemeral=True
+        )
 def create_central_embed(guild):
 
     total_members = guild.member_count or 0
@@ -640,7 +765,69 @@ def create_central_embed(guild):
 
     return embed
 
+class Squad23View(discord.ui.View):
+    def __init__(self):
+        super().__init__(timeout=None)
 
+    @discord.ui.button(
+        label="Vagas",
+        emoji="<:emoji_37:1538191545407381615>",
+        style=discord.ButtonStyle.primary,
+        custom_id="squad23_vagas"
+    )
+    async def vagas(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.send_message(
+            f"{EMOJI_VAGAS} Veja as vagas disponíveis para encontrar jogadores.",
+            ephemeral=True
+        )
+
+    @discord.ui.button(
+        label="Procurar",
+        emoji="<:emoji_38:1538191582249877514>",
+        style=discord.ButtonStyle.secondary,
+        custom_id="squad23_procurar"
+    )
+    async def procurar(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.send_message(
+            f"{EMOJI_PROCURAR} Procure jogadores para completar seu squad.",
+            ephemeral=True
+        )
+
+    @discord.ui.button(
+        label="Criar",
+        emoji="<:emoji_39:1538191603624190144>",
+        style=discord.ButtonStyle.success,
+        custom_id="squad23_criar"
+    )
+    async def criar(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.send_message(
+            f"{EMOJI_CRIAR} Crie uma nova vaga para seu squad.",
+            ephemeral=True
+        )
+
+    @discord.ui.button(
+        label="Meu Squad",
+        emoji="<:emoji_40:1538191651837837343>",
+        style=discord.ButtonStyle.secondary,
+        custom_id="squad23_meu_squad"
+    )
+    async def meu_squad(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.send_message(
+            f"{EMOJI_SQUAD} Aqui você poderá gerenciar seu squad.",
+            ephemeral=True
+        )
+
+    @discord.ui.button(
+        label="Entrar",
+        emoji="<:emoji_41:1538191684238577734>",
+        style=discord.ButtonStyle.primary,
+        custom_id="squad23_entrar"
+    )
+    async def entrar(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.send_message(
+            f"{EMOJI_ENTRAR} Escolha uma vaga disponível para entrar.",
+            ephemeral=True
+        )
 async def send_central_panel():
 
     channel = bot.get_channel(CENTRAL_CHANNEL_ID)
