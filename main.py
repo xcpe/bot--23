@@ -854,7 +854,7 @@ class Squad23View(discord.ui.View):
             "📭 Nenhuma vaga disponível no momento.",
             ephemeral=True
         )
-        return
+     return
 
     texto = ""
 
