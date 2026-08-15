@@ -886,7 +886,7 @@ async def send_squad_panel():
 
 print("✅ Painel Squad ²³ criado com sucesso.")
 
-    async def send_central_panel():
+async def send_central_panel():
         channel = bot.get_channel(CENTRAL_CHANNEL_ID)
 
         if channel is None:
