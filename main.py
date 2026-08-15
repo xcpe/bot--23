@@ -634,7 +634,7 @@ class Squad23View(discord.ui.View):
         )
     class Squad23View(discord.ui.View):
         def __init__(self):
-        super().__init__(timeout=None)
+            super().__init__(timeout=None)
 
         @discord.ui.button(
         label="Vagas",
