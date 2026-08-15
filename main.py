@@ -849,9 +849,45 @@ class Squad23View(discord.ui.View):
             f"{EMOJI_ENTRAR} Escolha uma vaga disponível para entrar.",
             ephemeral=True
         )
-async def send_central_panel():
+async def send_squad_panel():
+    channel = bot.get_channel(SQUAD_CHANNEL_ID)
 
-    channel = bot.get_channel(CENTRAL_CHANNEL_ID)
+    if channel is None:
+        print("❌ Squad ²³: canal não encontrado.")
+        return
+
+    embed = discord.Embed(
+        title=f"{EMOJI_SQUAD} • SQUAD ²³",
+        description=(
+            "Monte seu squad e encontre jogadores da comunidade.\n\n"
+            f"{EMOJI_VAGAS} **VAGAS**\n"
+            "Veja squads procurando jogadores.\n\n"
+            f"{EMOJI_PROCURAR} **PROCURAR**\n"
+            "Encontre jogadores para jogar com você.\n\n"
+            f"{EMOJI_CRIAR} **CRIAR**\n"
+            "Crie uma nova vaga para seu squad.\n\n"
+            f"{EMOJI_SQUAD} **MEU SQUAD**\n"
+            "Gerencie seu squad.\n\n"
+            f"{EMOJI_ENTRAR} **ENTRAR**\n"
+            "Entre em uma vaga disponível."
+        ),
+        color=0x74C0FC
+    )
+
+    embed.set_footer(text="²³ • encontre seu time, jogue junto.")
+
+    if channel.guild.icon:
+        embed.set_thumbnail(url=channel.guild.icon.url)
+
+    await channel.send(
+        embed=embed,
+        view=Squad23View()
+    )
+
+    print("✅ Painel Squad ²³ criado com sucesso.")async def send_central_panel():
+
+    async def send_central_panel():
+        channel = bot.get_channel(CENTRAL_CHANNEL_ID)
 
     if channel is None:
         print("❌ Central ²³: canal não encontrado.")
