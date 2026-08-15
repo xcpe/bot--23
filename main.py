@@ -785,7 +785,46 @@ def create_central_embed(guild):
     )
 
     return embed
+class CriarSquadModal(discord.ui.Modal, title="Criar vaga para Squad"):
 
+    nome = discord.ui.TextInput(
+        label="Nome do Squad",
+        placeholder="Ex: Squad 23",
+        max_length=30
+    )
+
+    quantidade = discord.ui.TextInput(
+        label="Quantas vagas?",
+        placeholder="Ex: 2",
+        max_length=1
+    )
+
+    descricao = discord.ui.TextInput(
+        label="Descrição",
+        placeholder="Ex: Mestre+, com call e ativo",
+        style=discord.TextStyle.paragraph,
+        required=False,
+        max_length=150
+    )
+
+    async def on_submit(self, interaction: discord.Interaction):
+        embed = discord.Embed(
+            title="🎮 Nova vaga de Squad",
+            description=(
+                f"**Squad:** {self.nome.value}\n"
+                f"**Vagas:** {self.quantidade.value}\n"
+                f"**Descrição:** {self.descricao.value or 'Sem descrição'}\n\n"
+                f"**Criado por:** {interaction.user.mention}"
+            ),
+            color=0x74C0FC
+        )
+
+        await interaction.response.send_message(
+            "✅ Sua vaga foi criada!",
+            ephemeral=True
+        )
+
+        await interaction.channel.send(embed=embed)
 class Squad23View(discord.ui.View):
     def __init__(self):
         super().__init__(timeout=None)
@@ -820,11 +859,8 @@ class Squad23View(discord.ui.View):
         style=discord.ButtonStyle.success,
         custom_id="squad23_criar"
     )
-    async def criar(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await interaction.response.send_message(
-            f"{EMOJI_CRIAR} Crie uma nova vaga para seu squad.",
-            ephemeral=True
-        )
+    async def criar(self, interaction: discord.Interaction):
+        await interaction.response.send_modal(CriarSquadModal())
 
     @discord.ui.button(
         label="Meu Squad",
