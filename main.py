@@ -63,8 +63,8 @@ posted_names = set()
 
 def generate_4c():
     chars = string.ascii_lowercase + string.digits
-    return "".join(random.choice(chars) for _ in range(
-     # ==============================
+    return "".join(random.choice(chars) for _ in range(4))
+# ==============================
 # LOOP AUTOMÁTICO 4C
 # ==============================
 
