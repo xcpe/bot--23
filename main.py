@@ -482,7 +482,185 @@ async def setup_suporte(
 # =========================================================
 # READY
 # =========================================================
+# =========================================================
+# ☁️ CENTRAL ²³
+# =========================================================
 
+CENTRAL_CHANNEL_ID = 1538024768580620409
+
+CENTRAL_BANNER_URL = (
+    "https://cdn.discordapp.com/attachments/"
+    "1534219426591670456/1538027510778957934/IMG_4973.jpg"
+    "?ex=6a812f3d&is=6a7fddbd&hm=07d3f65f2852679a61ce776874b8b06bcb3bf67db44e64f29286cff79766c884&"
+)
+
+
+class Central23View(discord.ui.View):
+
+    def __init__(self):
+        super().__init__(timeout=None)
+
+    @discord.ui.button(
+        label="Suporte",
+        emoji="🎫",
+        style=discord.ButtonStyle.primary,
+        custom_id="central23_support"
+    )
+    async def suporte(
+        self,
+        interaction: discord.Interaction,
+        button: discord.ui.Button
+    ):
+        await interaction.response.send_message(
+            "🎫 Para receber atendimento, acesse o canal de **suporte** da ²³.",
+            ephemeral=True
+        )
+
+    @discord.ui.button(
+        label="Squad",
+        emoji="🎮",
+        style=discord.ButtonStyle.secondary,
+        custom_id="central23_squad"
+    )
+    async def squad(
+        self,
+        interaction: discord.Interaction,
+        button: discord.ui.Button
+    ):
+        await interaction.response.send_message(
+            "🎮 O sistema de **Procurar Squad** está chegando em breve.",
+            ephemeral=True
+        )
+
+    @discord.ui.button(
+        label="Ranking",
+        emoji="🏆",
+        style=discord.ButtonStyle.secondary,
+        custom_id="central23_ranking"
+    )
+    async def ranking(
+        self,
+        interaction: discord.Interaction,
+        button: discord.ui.Button
+    ):
+        await interaction.response.send_message(
+            "🏆 O **Ranking ²³** está chegando em breve.",
+            ephemeral=True
+        )
+
+    @discord.ui.button(
+        label="Sugestão",
+        emoji="💡",
+        style=discord.ButtonStyle.secondary,
+        custom_id="central23_suggestion"
+    )
+    async def sugestao(
+        self,
+        interaction: discord.Interaction,
+        button: discord.ui.Button
+    ):
+        await interaction.response.send_message(
+            "💡 O sistema de **sugestões** está chegando em breve.",
+            ephemeral=True
+        )
+
+
+def create_central_embed(guild):
+
+    total_members = guild.member_count or 0
+
+    online_members = sum(
+        1
+        for member in guild.members
+        if not member.bot
+        and member.status != discord.Status.offline
+    )
+
+    boost_count = guild.premium_subscription_count or 0
+
+    created_timestamp = int(guild.created_at.timestamp())
+
+    embed = discord.Embed(
+        title="☁️  ²³ • CENTRAL",
+        description=(
+            "Bem-vindo à central da **²³**.\n"
+            "Tudo que você precisa, reunido em um só lugar.\n\n"
+            "━━━━━━━━━━━━━━━━━━━━━━\n"
+            "### 📊 Estatísticas da comunidade"
+        ),
+        color=0x74C0FC
+    )
+
+    embed.add_field(
+        name="👥  MEMBROS",
+        value=f"**{total_members:,}**".replace(",", "."),
+        inline=True
+    )
+
+    embed.add_field(
+        name="🟢  ONLINE",
+        value=f"**{online_members:,}**".replace(",", "."),
+        inline=True
+    )
+
+    embed.add_field(
+        name="🚀  BOOSTS",
+        value=f"**{boost_count}**",
+        inline=True
+    )
+
+    embed.add_field(
+        name="📅  NOSSA HISTÓRIA",
+        value=f"Servidor criado <t:{created_timestamp}:R>",
+        inline=False
+    )
+
+    embed.add_field(
+        name="✨  ACESSO RÁPIDO",
+        value=(
+            "Use os botões abaixo para navegar pelos "
+            "principais recursos da comunidade."
+        ),
+        inline=False
+    )
+
+    embed.set_image(url=CENTRAL_BANNER_URL)
+
+    if guild.icon:
+        embed.set_thumbnail(url=guild.icon.url)
+
+    embed.set_footer(
+        text="²³ • nossa comunidade, nossa história."
+    )
+
+    return embed
+
+
+async def send_central_panel():
+
+    channel = bot.get_channel(CENTRAL_CHANNEL_ID)
+
+    if channel is None:
+        print("❌ Central ²³: canal não encontrado.")
+        return
+
+    guild = channel.guild
+
+    try:
+        embed = create_central_embed(guild)
+
+        await channel.send(
+            embed=embed,
+            view=Central23View()
+        )
+
+        print("☁️ Central ²³ criada com sucesso.")
+
+    except discord.HTTPException as error:
+        print(f"⚠️ Erro do Discord ao criar Central ²³: {error}")
+
+    except Exception as error:
+        print(f"❌ Erro na Central ²³: {error}")
 @bot.event
 async def on_ready():
 
@@ -493,7 +671,9 @@ async def on_ready():
     bot.add_view(
         CloseTicketView()
     )
-
+bot.add_view(
+    Central23View()
+)
     try:
 
         await bot.tree.sync(
@@ -510,7 +690,9 @@ async def on_ready():
 
     if not four_character_checker.is_running():
         four_character_checker.start()
-
+if not getattr(bot, "central_23_loaded", False):
+    await send_central_panel()
+    bot.central_23_loaded = True
     print(
         f"✅ /23 online como {bot.user}"
     )
