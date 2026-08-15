@@ -676,7 +676,7 @@ bot.add_view(
 )
 try:
 
-        await bot.tree.sync(
+    await bot.tree.sync(
             guild=discord.Object(
                 id=GUILD_ID
             )
