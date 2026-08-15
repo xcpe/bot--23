@@ -859,7 +859,11 @@ class Squad23View(discord.ui.View):
         style=discord.ButtonStyle.success,
         custom_id="squad23_criar"
     )
-    async def criar(self, interaction: discord.Interaction):
+    async def criar(
+    self,
+    interaction: discord.Interaction,
+    button: discord.ui.Button
+):
         await interaction.response.send_modal(CriarSquadModal())
 
     @discord.ui.button(
