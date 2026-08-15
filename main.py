@@ -964,7 +964,7 @@ class EntrarSquadSelect(discord.ui.Select):
         style=discord.ButtonStyle.primary,
         custom_id="squad23_entrar"
     )
-        async def entrar(
+    async def entrar(
         self,
         interaction: discord.Interaction,
         button: discord.ui.Button
