@@ -527,13 +527,25 @@ class Central23View(discord.ui.View):
         style=discord.ButtonStyle.secondary,
         custom_id="central23_squad"
     )
-    async def squad(
+        async def squad(
         self,
         interaction: discord.Interaction,
         button: discord.ui.Button
     ):
+        channel = bot.get_channel(SQUAD_CHANNEL_ID)
+
+        if channel is None:
+            await interaction.response.send_message(
+                "❌ Canal do Squad não encontrado.",
+                ephemeral=True
+            )
+            return
+
+        channel_url = f"https://discord.com/channels/{channel.guild.id}/{channel.id}"
+
         await interaction.response.send_message(
-            "🎮 O sistema de **Procurar Squad** está chegando em breve.",
+            f"{EMOJI_SQUAD} **Painel Squad ²³**\n"
+            f"👉 {channel_url}",
             ephemeral=True
         )
 
