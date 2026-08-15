@@ -661,41 +661,25 @@ async def send_central_panel():
 
     except Exception as error:
         print(f"❌ Erro na Central ²³: {error}")
-@bot.event
+
+        @bot.event
 async def on_ready():
+    bot.add_view(SupportView())
+    bot.add_view(CloseTicketView())
+    bot.add_view(Central23View())
 
-    bot.add_view(
-        SupportView()
-    )
+    try:
+        await bot.tree.sync(guild=discord.Object(id=GUILD_ID))
+    except Exception as error:
+        print(f"❌ Sync: {error}")
 
-    bot.add_view(
-        CloseTicketView()
-    )
-bot.add_view(
-    Central23View()
-)
-try:
-
-    await bot.tree.sync(
-            guild=discord.Object(
-                id=GUILD_ID
-            )
-        )
-
-except Exception as error:
-
-        print(
-            f"❌ Sync: {error}"
-        )
-
-if not four_character_checker.is_running():
+    if not four_character_checker.is_running():
         four_character_checker.start()
-if not getattr(bot, "central_23_loaded", False):
-    await send_central_panel()
-    bot.central_23_loaded = True
-    print(
-        f"✅ /23 online como {bot.user}"
-    )
 
+    if not getattr(bot, "central_23_loaded", False):
+        await send_central_panel()
+        bot.central_23_loaded = True
+
+    print(f"✅ /23 online como {bot.user}")
 
 bot.run(TOKEN)
