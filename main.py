@@ -63,18 +63,17 @@ posted_names = set()
 
 def generate_4c():
     chars = string.ascii_lowercase + string.digits
-    return "".join(random.choice(chars) for _ in range(4))
-# =========================================================
-# =========================================================
+    return "".join(random.choice(chars) for _ in range(
+     # ==============================
 # LOOP AUTOMÁTICO 4C
-# ========================================================
+# ==============================
+
 @tasks.loop(seconds=60)
 async def four_character_checker():
-
     channel = bot.get_channel(CHECKER_CHANNEL_ID)
 
     if channel is None:
-        print("❌ Canal do checker não encontrado.")
+        print("❌ Canal do checker não encontrado")
         return
 
     username = generate_4c()
@@ -91,20 +90,24 @@ async def four_character_checker():
 
     message = (
         f"☁️ **²³ • 4C**\n"
-        f"🔎 - **{username}** | 4C gerado para tentativa de uso. "
+        f"🔎 - **{username}** | 4C gerado para verificação\n"
         f"<t:{timestamp}:F> (<t:{timestamp}:R>)"
     )
-try:
-    await channel.send(message)
-    print(f"🔎 4C GERADO: {username}")
 
-except discord.HTTPException as error:
-    print(f"⚠️ Falha temporária ao enviar 4C: {error}")
-    return
+    try:
+        await channel.send(message)
+        print(f"🔎 4C GERADO: {username}")
 
-except Exception as error:
-    print(f"❌ Erro ao enviar 4C: {error}")
-    return
+    except discord.HTTPException as error:
+        print(f"⚠️ Falha temporária ao enviar 4C: {error}")
+
+    except Exception as error:
+        print(f"❌ Erro ao enviar 4C: {error}")
+
+
+@four_character_checker.before_loop
+async def before_checker():
+    await bot.wait_until_ready()
 # =========================================================
 # FECHAR TICKET
 # =========================================================
