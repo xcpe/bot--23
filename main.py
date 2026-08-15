@@ -94,8 +94,7 @@ async def four_character_checker():
         f"🔎 - **{username}** | 4C gerado para tentativa de uso. "
         f"<t:{timestamp}:F> (<t:{timestamp}:R>)"
     )
-
-    try:
+try:
     await channel.send(message)
     print(f"🔎 4C GERADO: {username}")
 
@@ -106,10 +105,6 @@ except discord.HTTPException as error:
 except Exception as error:
     print(f"❌ Erro ao enviar 4C: {error}")
     return
-
-@four_character_checker.before_loop
-async def before_checker():
-    await bot.wait_until_ready()
 # =========================================================
 # FECHAR TICKET
 # =========================================================
