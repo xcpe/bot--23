@@ -849,10 +849,27 @@ class Squad23View(discord.ui.View):
     interaction: discord.Interaction,
     button: discord.ui.Button
 ):
+            if not hasattr(bot, "squad_vagas") or not bot.squad_vagas:
         await interaction.response.send_message(
-            f"{EMOJI_VAGAS} Veja as vagas disponíveis para encontrar jogadores.",
+            "📭 Nenhuma vaga disponível no momento.",
             ephemeral=True
         )
+        return
+
+    texto = ""
+
+    for i, vaga in enumerate(bot.squad_vagas, start=1):
+        texto += (
+            f"**{i}. {vaga['nome']}**\n"
+            f"👤 Criado por: <@{vaga['criador']}>\n"
+            f"🧩 Vagas: {vaga['quantidade']}\n"
+            f"📝 {vaga['descricao']}\n\n"
+        )
+
+    await interaction.response.send_message(
+        f"{EMOJI_VAGAS} **VAGAS DISPONÍVEIS**\n\n{texto}",
+        ephemeral=True
+    )
 
     @discord.ui.button(
         label="Procurar",
