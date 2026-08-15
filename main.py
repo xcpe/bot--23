@@ -632,7 +632,7 @@ class Squad23View(discord.ui.View):
             f"{EMOJI_ENTRAR} Escolha uma vaga disponível para entrar.",
             ephemeral=True
         )
-        class Squad23View(discord.ui.View):
+    class Squad23View(discord.ui.View):
         def __init__(self):
         super().__init__(timeout=None)
 
