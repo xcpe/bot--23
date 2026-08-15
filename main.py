@@ -654,9 +654,18 @@ class Squad23View(discord.ui.View):
         style=discord.ButtonStyle.secondary,
         custom_id="squad23_procurar"
     )
-    async def procurar(self, interaction: discord.Interaction, button: discord.ui.Button):
+        async def procurar(self, interaction: discord.Interaction, button: discord.ui.Button):
+        channel = bot.get_channel(SQUAD_CHANNEL_ID)
+
+        if channel is None:
+            await interaction.response.send_message(
+                "❌ Canal do Squad não encontrado.",
+                ephemeral=True
+            )
+            return
+
         await interaction.response.send_message(
-            f"{EMOJI_PROCURAR} Procure jogadores.",
+            f"{EMOJI_PROCURAR} Painel de Squad disponível em {channel.mention}.",
             ephemeral=True
         )
 
