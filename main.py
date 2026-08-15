@@ -674,7 +674,7 @@ async def on_ready():
 bot.add_view(
     Central23View()
 )
-    try:
+try:
 
         await bot.tree.sync(
             guild=discord.Object(
@@ -682,13 +682,13 @@ bot.add_view(
             )
         )
 
-    except Exception as error:
+except Exception as error:
 
         print(
             f"❌ Sync: {error}"
         )
 
-    if not four_character_checker.is_running():
+if not four_character_checker.is_running():
         four_character_checker.start()
 if not getattr(bot, "central_23_loaded", False):
     await send_central_panel()
