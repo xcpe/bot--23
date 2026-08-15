@@ -834,7 +834,49 @@ class CriarSquadModal(discord.ui.Modal, title="Criar vaga para Squad"):
         )
 
         await interaction.channel.send(embed=embed)
-class Squad23View(discord.ui.View):
+class EntrarSquadSelect(discord.ui.Select):
+    def __init__(self, opcoes):
+        super().__init__(
+            placeholder="Escolha um squad",
+            options=opcoes,
+            min_values=1,
+            max_values=1
+        )
+
+    async def callback(self, interaction: discord.Interaction):
+        indice = int(self.values[0])
+
+        if not hasattr(bot, "squad_vagas"):
+            await interaction.response.send_message(
+                "❌ Essa vaga não existe mais.",
+                ephemeral=True
+            )
+            return
+
+        if indice >= len(bot.squad_vagas):
+            await interaction.response.send_message(
+                "❌ Essa vaga não existe mais.",
+                ephemeral=True
+            )
+            return
+
+        vaga = bot.squad_vagas[indice]
+        quantidade = int(vaga["quantidade"])
+
+        if quantidade <= 0:
+            await interaction.response.send_message(
+                "❌ Essa vaga já foi preenchida.",
+                ephemeral=True
+            )
+            return
+
+        vaga["quantidade"] = str(quantidade - 1)
+
+        await interaction.response.send_message(
+            f"✅ Você entrou no squad **{vaga['nome']}**!",
+            ephemeral=True
+        )
+        class Squad23View(discord.ui.View):
     def __init__(self):
         super().__init__(timeout=None)
 
@@ -922,13 +964,45 @@ class Squad23View(discord.ui.View):
         style=discord.ButtonStyle.primary,
         custom_id="squad23_entrar"
     )
-    async def entrar(
-    self,
-    interaction: discord.Interaction,
-    button: discord.ui.Button
-):
+        async def entrar(
+        self,
+        interaction: discord.Interaction,
+        button: discord.ui.Button
+    ):
+        if not hasattr(bot, "squad_vagas") or not bot.squad_vagas:
+            await interaction.response.send_message(
+                "📭 Nenhuma vaga disponível para entrar.",
+                ephemeral=True
+            )
+            return
+
+        opcoes = []
+
+        for i, vaga in enumerate(bot.squad_vagas):
+            if int(vaga["quantidade"]) > 0:
+                opcoes.append(
+                    discord.SelectOption(
+                        label=vaga["nome"],
+                        description=f"{vaga['quantidade']} vaga(s) disponível(is)",
+                        value=str(i)
+                    )
+                )
+
+        if not opcoes:
+            await interaction.response.send_message(
+                "📭 Todas as vagas já foram preenchidas.",
+                ephemeral=True
+            )
+            return
+
+        select = EntrarSquadSelect(opcoes)
+
+        view = discord.ui.View()
+        view.add_item(select)
+
         await interaction.response.send_message(
-            f"{EMOJI_ENTRAR} Escolha uma vaga disponível para entrar.",
+            "➡️ Escolha o squad que deseja entrar:",
+            view=view,
             ephemeral=True
         )
 async def send_squad_panel():
