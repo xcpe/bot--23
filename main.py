@@ -864,7 +864,7 @@ class Squad23View(discord.ui.View):
             f"👤 Criado por: <@{vaga['criador']}>\n"
             f"🧩 Vagas: {vaga['quantidade']}\n"
             f"📝 {vaga['descricao']}\n\n"
-        )
+    )
 
     await interaction.response.send_message(
         f"{EMOJI_VAGAS} **VAGAS DISPONÍVEIS**\n\n{texto}",
