@@ -849,8 +849,8 @@ class Squad23View(discord.ui.View):
     interaction: discord.Interaction,
     button: discord.ui.Button
 ):
-    if not hasattr(bot, "squad_vagas") or not bot.squad_vagas:
-        await interaction.response.send_message(
+     if not hasattr(bot, "squad_vagas") or not bot.squad_vagas:
+         await interaction.response.send_message(
             "📭 Nenhuma vaga disponível no momento.",
             ephemeral=True
         )
