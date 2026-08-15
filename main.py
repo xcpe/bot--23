@@ -896,7 +896,7 @@ async def send_central_panel():
         guild = channel.guild
 
         try:
-        embed = create_central_embed(guild)
+            embed = create_central_embed(guild)
 
         await channel.send(
             embed=embed,
