@@ -808,6 +808,15 @@ class CriarSquadModal(discord.ui.Modal, title="Criar vaga para Squad"):
     )
 
     async def on_submit(self, interaction: discord.Interaction):
+        if not hasattr(bot, "squad_vagas"):
+            bot.squad_vagas = []
+
+        bot.squad_vagas.append({
+            "nome": self.nome.value,
+            "quantidade": self.quantidade.value,
+            "descricao": self.descricao.value or "Sem descrição",
+            "criador": interaction.user.id
+        })
         embed = discord.Embed(
             title="🎮 Nova vaga de Squad",
             description=(
