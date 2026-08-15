@@ -662,7 +662,7 @@ async def send_central_panel():
     except Exception as error:
         print(f"❌ Erro na Central ²³: {error}")
 
-        @bot.event
+@bot.event
 async def on_ready():
     bot.add_view(SupportView())
     bot.add_view(CloseTicketView())
