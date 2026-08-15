@@ -487,7 +487,7 @@ async def setup_suporte(
 # =========================================================
 
 CENTRAL_CHANNEL_ID = 1538024768580620409
-
+SQUAD_CHANNEL_ID = 1538185588430086244
 CENTRAL_BANNER_URL = (
     "https://cdn.discordapp.com/attachments/"
     "1534219426591670456/1538027510778957934/IMG_4973.jpg"
