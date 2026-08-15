@@ -880,7 +880,7 @@ async def on_ready():
     bot.add_view(SupportView())
     bot.add_view(CloseTicketView())
     bot.add_view(Central23View())
-
+    bot.add_view(Squad23View())
     try:
         await bot.tree.sync(guild=discord.Object(id=GUILD_ID))
     except Exception as error:
@@ -892,7 +892,9 @@ async def on_ready():
     if not getattr(bot, "central_23_loaded", False):
         await send_central_panel()
         bot.central_23_loaded = True
-
+    if not getattr(bot, "squad_23_loaded", False):
+        await send_squad_panel()
+        bot.squad_23_loaded = True
     print(f"✅ /23 online como {bot.user}")
 
 bot.run(TOKEN)
